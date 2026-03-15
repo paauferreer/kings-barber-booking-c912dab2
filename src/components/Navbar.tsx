@@ -8,11 +8,11 @@ interface NavbarProps {
 }
 
 const links = [
-  { label: "Servicios", href: "#servicios" },
-  { label: "Galería", href: "#galeria" },
-  { label: "Reseñas", href: "#resenas" },
-  { label: "Contacto", href: "#contacto" },
-];
+{ label: "Servicios", href: "#servicios" },
+{ label: "Galería", href: "#galeria" },
+{ label: "Reseñas", href: "#resenas" },
+{ label: "Contacto", href: "#contacto" }];
+
 
 const Navbar = ({ onBookNow }: NavbarProps) => {
   const [open, setOpen] = useState(false);
@@ -21,20 +21,20 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
     <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-16">
         <a href="#" className="flex items-center gap-3">
-          <img src={logo} alt="KBS" className="w-10 h-10 object-contain rounded" />
+          <img alt="KBS" className="w-10 h-10 object-contain rounded" src="/lovable-uploads/2951151f-5346-4682-a441-dbd2fa75d9af.png" />
           <span className="font-display text-lg text-primary hidden sm:inline">Kings Barber Shop</span>
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm text-muted-foreground hover:text-primary transition-colors font-body">
+          {links.map((l) =>
+          <a key={l.href} href={l.href} className="text-sm text-muted-foreground hover:text-primary transition-colors font-body">
               {l.label}
             </a>
-          ))}
+          )}
           <button
             onClick={onBookNow}
-            className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:brightness-110 transition-all"
-          >
+            className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:brightness-110 transition-all">
+            
             Reservar
           </button>
         </div>
@@ -45,31 +45,31 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
       </div>
 
       <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-b border-border overflow-hidden"
-          >
+        {open &&
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="md:hidden bg-background border-b border-border overflow-hidden">
+          
             <div className="flex flex-col p-4 gap-4">
-              {links.map((l) => (
-                <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-muted-foreground hover:text-primary transition-colors">
+              {links.map((l) =>
+            <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-muted-foreground hover:text-primary transition-colors">
                   {l.label}
                 </a>
-              ))}
+            )}
               <button
-                onClick={() => { setOpen(false); onBookNow(); }}
-                className="bg-primary text-primary-foreground px-5 py-2 rounded-lg font-semibold"
-              >
+              onClick={() => {setOpen(false);onBookNow();}}
+              className="bg-primary text-primary-foreground px-5 py-2 rounded-lg font-semibold">
+              
                 Reservar Cita
               </button>
             </div>
           </motion.div>
-        )}
+        }
       </AnimatePresence>
-    </nav>
-  );
+    </nav>);
+
 };
 
 export default Navbar;

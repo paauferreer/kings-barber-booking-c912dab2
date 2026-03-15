@@ -20,16 +20,16 @@ const HeroSection = ({ onBookNow }: HeroSectionProps) => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
+            transition={{ duration: 0.8, ease: "easeOut" }}>
+            
             <motion.img
-              src={logo}
+
               alt="Kings Barber Shop Logo"
               className="w-28 h-28 object-contain mb-8 rounded-lg"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            />
+              transition={{ delay: 0.2, duration: 0.6 }} src="/lovable-uploads/bf1a3b39-5e84-4ea7-86cc-ef18428e754a.png" />
+            
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4">
               <span className="gold-gradient-text">Kings</span>
               <br />
@@ -46,15 +46,15 @@ const HeroSection = ({ onBookNow }: HeroSectionProps) => {
               onClick={onBookNow}
               className="bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-lg text-lg hover:brightness-110 transition-all gold-glow"
               whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
+              whileTap={{ scale: 0.97 }}>
+              
               Reservar Cita
             </motion.button>
           </motion.div>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default HeroSection;

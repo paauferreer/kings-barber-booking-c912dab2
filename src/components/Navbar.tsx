@@ -22,7 +22,7 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-16">
         <a href="#" className="flex items-center gap-3">
           <img alt="KBS" className="w-10 h-10 object-contain rounded" src="/lovable-uploads/2951151f-5346-4682-a441-dbd2fa75d9af.png" />
-          <span className="font-display text-lg text-primary hidden sm:inline">Kings Barber Shop</span>
+          <span className="font-display text-lg text-primary hidden sm:inline">​  </span>
         </a>
 
         <div className="hidden md:flex items-center gap-8">

@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ServicesSection from "@/components/ServicesSection";
 import GalleryCarousel from "@/components/GalleryCarousel";
+import HaircutsSection from "@/components/HaircutsSection";
 import ReviewsSection from "@/components/ReviewsSection";
 import InfoFooter from "@/components/InfoFooter";
 import BookingModal from "@/components/BookingModal";

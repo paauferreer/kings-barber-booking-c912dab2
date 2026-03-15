@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 const gallery1 = "/lovable-uploads/0475a971-1ed6-499f-a3e7-3f59d228314d.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
+const gallery2 = "/lovable-uploads/65f9f93b-ac1d-4453-8175-025758423c4f.jpg";
+const gallery3 = "/lovable-uploads/0b078061-1b97-4996-b74a-f65020e93453.jpg";
 import gallery4 from "@/assets/gallery-4.jpg";
 import cabezera from "@/assets/cabezera.jpeg";
 

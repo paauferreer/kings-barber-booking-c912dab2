@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const gallery1 = "/lovable-uploads/0475a971-1ed6-499f-a3e7-3f59d228314d.jpg";
 const gallery2 = "/lovable-uploads/65f9f93b-ac1d-4453-8175-025758423c4f.jpg";
 const gallery3 = "/lovable-uploads/0b078061-1b97-4996-b74a-f65020e93453.jpg";
-import gallery4 from "@/assets/gallery-4.jpg";
+const gallery4 = "/lovable-uploads/705c4e79-7643-47a4-9a49-f2fef9c80e4a.jpg";
 import cabezera from "@/assets/cabezera.jpeg";
 
 const images = [

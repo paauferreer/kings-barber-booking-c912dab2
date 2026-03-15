@@ -23,6 +23,7 @@ const Index = () => {
       <HeroSection onBookNow={() => openBooking()} />
       <ServicesSection onBookService={(s) => openBooking(s)} />
       <GalleryCarousel />
+      <HaircutsSection />
       <ReviewsSection />
       <InfoFooter />
       <BookingModal

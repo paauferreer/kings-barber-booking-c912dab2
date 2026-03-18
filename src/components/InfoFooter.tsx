@@ -83,7 +83,7 @@ const InfoFooter = () => {
                 className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
                 
                 <Instagram className="w-5 h-5 text-primary" />
-                <span>@kingsbarbershop_inca</span>
+                <span>@kingsbarbershop._</span>
               </a>
               <a
                 href="https://booksy.com/es-es/9504_kings-barber-shop_barberia_68772_inca"

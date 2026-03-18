@@ -1,18 +1,12 @@
 import { motion } from "framer-motion";
-import corte1 from "@/assets/corte-1.jpg";
-import corte2 from "@/assets/corte-2.jpg";
-import corte3 from "@/assets/corte-3.jpg";
-import corte4 from "@/assets/corte-4.jpg";
-import corte5 from "@/assets/corte-5.jpg";
-import corte6 from "@/assets/corte-6.jpg";
 
 const cuts = [
-  { src: corte1, label: "Fade con línea" },
-  { src: corte2, label: "Crop texturizado" },
-  { src: corte3, label: "Pompadour clásico" },
-  { src: corte4, label: "Buzz cut con barba" },
-  { src: corte5, label: "Rizado con degradado" },
-  { src: corte6, label: "Mullet moderno" },
+  { src: "/lovable-uploads/corte-trenzas.jpg", label: "Trenzas" },
+  { src: "/lovable-uploads/corte-balayage.jpg", label: "Balayage" },
+  { src: "/lovable-uploads/corte-dibujo.jpg", label: "Degradado con dibujo" },
+  { src: "/lovable-uploads/corte-platino.jpg", label: "Platino texturizado" },
+  { src: "/lovable-uploads/corte-pestanas.jpg", label: "Lifting de pestañas" },
+  { src: "/lovable-uploads/corte-tigre.jpg", label: "Color fantasía" },
 ];
 
 const HaircutsSection = () => (

@@ -11,8 +11,8 @@ const InfoFooter = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+            viewport={{ once: true }}>
+            
             <h3 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5" /> Ubicación
             </h3>
@@ -25,8 +25,8 @@ const InfoFooter = () => {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Ubicación Kings Barber Shop"
-              />
+                title="Ubicación Kings Barber Shop" />
+              
             </div>
             <p className="text-sm text-muted-foreground mt-3">
               Carrer de n'Antoni Fluxà, 70<br />07300 Inca, Mallorca
@@ -38,28 +38,28 @@ const InfoFooter = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
+            transition={{ delay: 0.1 }}>
+            
             <h3 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5" /> Horario
             </h3>
             <div className="space-y-3">
               {[
-                { day: "Lunes", hours: "10:00 – 20:00" },
-                { day: "Martes", hours: "10:00 – 20:00" },
-                { day: "Miércoles", hours: "10:00 – 20:00" },
-                { day: "Jueves", hours: "10:00 – 20:00" },
-                { day: "Viernes", hours: "10:00 – 20:00" },
-                { day: "Sábado", hours: "09:00 – 14:00" },
-                { day: "Domingo", hours: "Cerrado" },
-              ].map((item) => (
-                <div key={item.day} className="flex justify-between text-sm">
+              { day: "Lunes", hours: "10:00 – 20:00" },
+              { day: "Martes", hours: "10:00 – 20:00" },
+              { day: "Miércoles", hours: "10:00 – 20:00" },
+              { day: "Jueves", hours: "10:00 – 20:00" },
+              { day: "Viernes", hours: "10:00 – 20:00" },
+              { day: "Sábado", hours: "09:00 – 14:00" },
+              { day: "Domingo", hours: "Cerrado" }].
+              map((item) =>
+              <div key={item.day} className="flex justify-between text-sm">
                   <span className="text-foreground">{item.day}</span>
                   <span className={item.hours === "Cerrado" ? "text-destructive" : "text-muted-foreground"}>
                     {item.hours}
                   </span>
                 </div>
-              ))}
+              )}
             </div>
           </motion.div>
 
@@ -68,8 +68,8 @@ const InfoFooter = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
+            transition={{ delay: 0.2 }}>
+            
             <h3 className="font-display text-xl text-primary mb-4">Contacto</h3>
             <div className="space-y-4">
               <a href="tel:632279304" className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
@@ -80,8 +80,8 @@ const InfoFooter = () => {
                 href="https://www.instagram.com/kingsbarbershop_inca/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-foreground hover:text-primary transition-colors"
-              >
+                className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
+                
                 <Instagram className="w-5 h-5 text-primary" />
                 <span>@kingsbarbershop_inca</span>
               </a>
@@ -89,15 +89,15 @@ const InfoFooter = () => {
                 href="https://booksy.com/es-es/9504_kings-barber-shop_barberia_68772_inca"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-foreground hover:text-primary transition-colors"
-              >
+                className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
+                
                 <span className="text-primary font-bold text-sm">B</span>
                 <span>Reservar en Booksy</span>
               </a>
             </div>
 
             <div className="mt-8">
-              <img src={logo} alt="Kings Barber Shop" className="w-20 h-20 object-contain rounded-lg opacity-60" />
+              <img alt="Kings Barber Shop" className="w-20 h-20 object-contain rounded-lg opacity-60" src="/lovable-uploads/ffa8ddcf-cc25-4d1c-ba75-2b178f268dc2.png" />
             </div>
           </motion.div>
         </div>
@@ -108,8 +108,8 @@ const InfoFooter = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
 
 export default InfoFooter;

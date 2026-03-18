@@ -86,8 +86,27 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
     return false;
   };
 
-  const handleSubmit = () => {
-    // In a real app this would send to a backend/email
+  const handleSubmit = async () => {
+    const dateObj = dates.find(d => {
+      const key = d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+      return key === selectedDate;
+    });
+    const dateStr = dateObj ? dateObj.toISOString().split("T")[0] : selectedDate;
+
+    const { error } = await supabase.from("appointments").insert({
+      client_name: name,
+      client_phone: phone,
+      client_email: email || null,
+      service: selectedService,
+      barber: selectedBarber,
+      appointment_date: dateStr,
+      appointment_time: selectedTime,
+    });
+
+    if (error) {
+      toast.error("Error al reservar. Inténtalo de nuevo.");
+      return;
+    }
     setSubmitted(true);
   };
 

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { X, ChevronLeft, ChevronRight, Check, Calendar, Clock, User, Scissors } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Check, Calendar, Clock, User, Scissors, Loader2 } from "lucide-react";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -10,37 +10,19 @@ interface BookingModalProps {
   preselectedService?: string;
 }
 
-const services = [
-  { name: "Corte King 👑", price: "16€", duration: "35 min" },
-  { name: "Corte + Barba Clásica", price: "18€", duration: "45 min" },
-  { name: "Corte + Cejas", price: "17€", duration: "35 min" },
-  { name: "Corte + Barba + Cejas", price: "19€", duration: "45 min" },
-  { name: "Corte + Cejas c/Hilo", price: "21€", duration: "45 min" },
-  { name: "Corte + Barba + Cejas c/Hilo", price: "24€", duration: "1h" },
-  { name: "Barba", price: "10€", duration: "15 min" },
-  { name: "Cejas c/Cuchilla", price: "5€", duration: "5 min" },
-  { name: "Cejas c/Hilo", price: "9€", duration: "15 min" },
-  { name: "Corte 6-8 años", price: "14€", duration: "35 min" },
-  { name: "Corte Mini King (0-5)", price: "12€", duration: "30 min" },
-  { name: "Corte Queen", price: "32€", duration: "45 min" },
-  { name: "Corte Chicas Basic", price: "25€", duration: "45 min" },
-  { name: "Tinte Chicos 1 Color", price: "15€", duration: "45 min" },
-  { name: "Mechas Básicas Chicos", price: "38€", duration: "3h" },
-  { name: "Permanente Chicos", price: "40€+", duration: "2h" },
-  { name: "Keratina Chicos", price: "50€", duration: "3h 30min" },
-];
+interface Service {
+  id: string;
+  name: string;
+  price: string;
+  duration: string;
+  category: string;
+}
 
 const barbers = [
   { name: "Camilo", flag: "🇨🇴/🇪🇸" },
   { name: "Kimy", flag: "🇬🇹" },
   { name: "Bryan", flag: "🇨🇴" },
   { name: "Víctor", flag: "🇪🇸" },
-];
-
-const timeSlots = [
-  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
-  "13:00", "13:30", "16:00", "16:30", "17:00", "17:30",
-  "18:00", "18:30", "19:00", "19:30",
 ];
 
 const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps) => {
@@ -54,6 +36,85 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  const [services, setServices] = useState<Service[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [barberSlots, setBarberSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  // Fetch services from DB
+  useEffect(() => {
+    if (!isOpen) return;
+    const fetchServices = async () => {
+      setLoadingServices(true);
+      const { data } = await supabase
+        .from("services")
+        .select("id, name, price, duration, category")
+        .eq("is_active", true)
+        .order("sort_order");
+      setServices(data || []);
+      setLoadingServices(false);
+    };
+    fetchServices();
+  }, [isOpen]);
+
+  // Generate next 14 days (no Sundays)
+  const dates = useMemo(() =>
+    Array.from({ length: 14 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i + 1);
+      return d;
+    }).filter(d => d.getDay() !== 0),
+  []);
+
+  // Fetch available slots for selected barber + date
+  useEffect(() => {
+    if (!selectedBarber || !selectedDate) {
+      setBarberSlots([]);
+      setBookedSlots([]);
+      return;
+    }
+
+    const dateObj = dates.find(d => {
+      const key = d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+      return key === selectedDate;
+    });
+    if (!dateObj) return;
+
+    const fetchSlots = async () => {
+      setLoadingSlots(true);
+      setSelectedTime("");
+
+      // JS getDay(): 0=Sunday, 1=Monday... We store 1=Monday..6=Saturday
+      const dayOfWeek = dateObj.getDay(); // 0=Sun already filtered out
+      const dateStr = dateObj.toISOString().split("T")[0];
+
+      // Fetch barber schedule for this day
+      const { data: scheduleData } = await supabase
+        .from("barber_schedules")
+        .select("time_slots")
+        .eq("barber_name", selectedBarber)
+        .eq("day_of_week", dayOfWeek)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      const availableSlots: string[] = scheduleData?.time_slots || [];
+      setBarberSlots(availableSlots);
+
+      // Fetch booked appointments for this barber + date
+      const { data: bookedData } = await supabase
+        .from("appointments")
+        .select("appointment_time")
+        .eq("barber", selectedBarber)
+        .eq("appointment_date", dateStr)
+        .in("status", ["pending", "confirmed"]);
+
+      setBookedSlots((bookedData || []).map(a => a.appointment_time));
+      setLoadingSlots(false);
+    };
+    fetchSlots();
+  }, [selectedBarber, selectedDate, dates]);
+
   const reset = () => {
     setStep(0);
     setSelectedService(preselectedService || "");
@@ -64,19 +125,11 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
     setPhone("");
     setEmail("");
     setSubmitted(false);
+    setBookedSlots([]);
+    setBarberSlots([]);
   };
 
-  const handleClose = () => {
-    reset();
-    onClose();
-  };
-
-  // Generate next 14 days
-  const dates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i + 1);
-    return d;
-  }).filter(d => d.getDay() !== 0); // exclude Sundays
+  const handleClose = () => { reset(); onClose(); };
 
   const canNext = () => {
     if (step === 0) return !!selectedService;
@@ -113,6 +166,9 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
   const steps = ["Servicio", "Barbero", "Fecha y Hora", "Datos"];
 
   if (!isOpen) return null;
+
+  const popularServices = services.filter(s => s.category === "popular");
+  const otherServices = services.filter(s => s.category !== "popular");
 
   return (
     <AnimatePresence>
@@ -158,7 +214,7 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                   <Check className="w-8 h-8 text-primary" />
                 </div>
                 <h4 className="font-display text-2xl text-foreground mb-2">¡Cita Reservada!</h4>
-                <p className="text-muted-foreground mb-1">Recibirás una confirmación por email.</p>
+                <p className="text-muted-foreground mb-1">Recibirás una confirmación.</p>
                 <p className="text-sm text-muted-foreground">
                   {selectedService} · {selectedBarber} · {selectedDate} a las {selectedTime}
                 </p>
@@ -171,26 +227,57 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                 {/* Step 0: Service */}
                 {step === 0 && (
                   <div className="space-y-2 max-h-80 overflow-y-auto">
-                    {services.map((s) => (
-                      <button
-                        key={s.name}
-                        onClick={() => setSelectedService(s.name)}
-                        className={`w-full text-left p-3 rounded-lg border transition-all flex justify-between items-center ${
-                          selectedService === s.name
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Scissors className="w-4 h-4 text-primary shrink-0" />
-                          <span className="text-sm text-foreground">{s.name}</span>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-primary font-semibold text-sm">{s.price}</span>
-                          <p className="text-xs text-muted-foreground">{s.duration}</p>
-                        </div>
-                      </button>
-                    ))}
+                    {loadingServices ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      </div>
+                    ) : (
+                      <>
+                        {popularServices.length > 0 && (
+                          <>
+                            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">⭐ Más Populares</p>
+                            {popularServices.map((s) => (
+                              <button
+                                key={s.id}
+                                onClick={() => setSelectedService(s.name)}
+                                className={`w-full text-left p-3 rounded-lg border transition-all flex justify-between items-center ${
+                                  selectedService === s.name ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Scissors className="w-4 h-4 text-primary shrink-0" />
+                                  <span className="text-sm text-foreground">{s.name}</span>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span className="text-primary font-semibold text-sm">{s.price}</span>
+                                  <p className="text-xs text-muted-foreground">{s.duration}</p>
+                                </div>
+                              </button>
+                            ))}
+                            <div className="border-t border-border my-2" />
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Todos los servicios</p>
+                          </>
+                        )}
+                        {otherServices.map((s) => (
+                          <button
+                            key={s.id}
+                            onClick={() => setSelectedService(s.name)}
+                            className={`w-full text-left p-3 rounded-lg border transition-all flex justify-between items-center ${
+                              selectedService === s.name ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Scissors className="w-4 h-4 text-primary shrink-0" />
+                              <span className="text-sm text-foreground">{s.name}</span>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-primary font-semibold text-sm">{s.price}</span>
+                              <p className="text-xs text-muted-foreground">{s.duration}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -202,9 +289,7 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                         key={b.name}
                         onClick={() => setSelectedBarber(b.name)}
                         className={`p-6 rounded-lg border transition-all text-center ${
-                          selectedBarber === b.name
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-primary/40"
+                          selectedBarber === b.name ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"
                         }`}
                       >
                         <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
@@ -232,9 +317,7 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                             key={key}
                             onClick={() => setSelectedDate(key)}
                             className={`shrink-0 px-4 py-3 rounded-lg border text-center transition-all ${
-                              selectedDate === key
-                                ? "border-primary bg-primary/10"
-                                : "border-border hover:border-primary/40"
+                              selectedDate === key ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"
                             }`}
                           >
                             <p className="text-xs text-muted-foreground capitalize">{dayName}</p>
@@ -247,21 +330,37 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                     <p className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
                       <Clock className="w-4 h-4" /> Selecciona hora
                     </p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {timeSlots.map((t) => (
-                        <button
-                          key={t}
-                          onClick={() => setSelectedTime(t)}
-                          className={`py-2 rounded-lg border text-sm transition-all ${
-                            selectedTime === t
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border text-foreground hover:border-primary/40"
-                          }`}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                    </div>
+                    {loadingSlots ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      </div>
+                    ) : barberSlots.length === 0 && selectedDate ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        {selectedBarber} no trabaja este día.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-2">
+                        {barberSlots.map((t) => {
+                          const isBooked = bookedSlots.includes(t);
+                          return (
+                            <button
+                              key={t}
+                              onClick={() => !isBooked && setSelectedTime(t)}
+                              disabled={isBooked}
+                              className={`py-2 rounded-lg border text-sm transition-all ${
+                                isBooked
+                                  ? "border-border bg-muted/50 text-muted-foreground line-through cursor-not-allowed opacity-50"
+                                  : selectedTime === t
+                                    ? "border-primary bg-primary/10 text-primary"
+                                    : "border-border text-foreground hover:border-primary/40"
+                              }`}
+                            >
+                              {t}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -270,35 +369,19 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm text-muted-foreground block mb-1">Nombre *</label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors"
-                        placeholder="Tu nombre"
-                      />
+                      <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors" placeholder="Tu nombre" />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground block mb-1">Teléfono *</label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors"
-                        placeholder="632 279 304"
-                      />
+                      <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                        className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors" placeholder="632 279 304" />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground block mb-1">Email (opcional)</label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors"
-                        placeholder="tu@email.com"
-                      />
+                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-primary transition-colors" placeholder="tu@email.com" />
                     </div>
-
                     <div className="card-elevated p-4 mt-4">
                       <p className="text-sm text-muted-foreground mb-1">Resumen</p>
                       <p className="text-foreground font-semibold">{selectedService}</p>
@@ -316,19 +399,13 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
                     <ChevronLeft className="w-4 h-4" /> Atrás
                   </button>
                   {step < 3 ? (
-                    <button
-                      onClick={() => setStep(step + 1)}
-                      disabled={!canNext()}
-                      className="flex items-center gap-1 bg-primary text-primary-foreground px-5 py-2 rounded-lg font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all"
-                    >
+                    <button onClick={() => setStep(step + 1)} disabled={!canNext()}
+                      className="flex items-center gap-1 bg-primary text-primary-foreground px-5 py-2 rounded-lg font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all">
                       Siguiente <ChevronRight className="w-4 h-4" />
                     </button>
                   ) : (
-                    <button
-                      onClick={handleSubmit}
-                      disabled={!canNext()}
-                      className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all gold-glow"
-                    >
+                    <button onClick={handleSubmit} disabled={!canNext()}
+                      className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all gold-glow">
                       Confirmar Cita
                     </button>
                   )}

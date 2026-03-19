@@ -59,6 +59,66 @@ export type Database = {
         }
         Relationships: []
       }
+      barber_schedules: {
+        Row: {
+          barber_name: string
+          day_of_week: number
+          id: string
+          is_active: boolean
+          time_slots: string[]
+        }
+        Insert: {
+          barber_name: string
+          day_of_week: number
+          id?: string
+          is_active?: boolean
+          time_slots?: string[]
+        }
+        Update: {
+          barber_name?: string
+          day_of_week?: number
+          id?: string
+          is_active?: boolean
+          time_slots?: string[]
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          duration: string
+          id: string
+          is_active: boolean
+          name: string
+          price: string
+          sort_order: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price: string
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

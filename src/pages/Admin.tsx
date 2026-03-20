@@ -214,12 +214,18 @@ const Admin = () => {
 
       <div className="p-4 md:p-8 max-w-7xl mx-auto">
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setTab("appointments")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "appointments" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+        <div className="flex gap-2 mb-6 overflow-x-auto">
+          <button onClick={() => setTab("appointments")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "appointments" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
             <Calendar className="w-4 h-4" /> Citas
           </button>
-          <button onClick={() => setTab("services")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "services" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+          <button onClick={() => setTab("services")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "services" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
             <Package className="w-4 h-4" /> Servicios
+          </button>
+          <button onClick={() => setTab("schedules")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "schedules" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+            <Settings className="w-4 h-4" /> Horarios
+          </button>
+          <button onClick={() => setTab("reviews")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "reviews" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+            <Star className="w-4 h-4" /> Reseñas
           </button>
         </div>
 

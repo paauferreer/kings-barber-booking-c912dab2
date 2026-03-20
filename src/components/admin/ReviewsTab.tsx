@@ -15,7 +15,11 @@ interface Review {
 
 const barbers = ["Camilo", "Kimy", "Bryan", "Víctor"];
 
-const ReviewsTab = () => {
+interface ReviewsTabProps {
+  addTrigger?: number;
+}
+
+const ReviewsTab = ({ addTrigger }: ReviewsTabProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

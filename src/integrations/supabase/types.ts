@@ -83,6 +83,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          barber: string
+          created_at: string
+          id: string
+          is_visible: boolean
+          name: string
+          rating: number
+          review_date: string
+          text: string
+        }
+        Insert: {
+          barber: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          name: string
+          rating?: number
+          review_date: string
+          text: string
+        }
+        Update: {
+          barber?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          name?: string
+          rating?: number
+          review_date?: string
+          text?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string

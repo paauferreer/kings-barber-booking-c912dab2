@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Plus, Calendar, Clock, User, Scissors, Phone, Mail, Trash2, Check, X, Edit2, Search, Package, Save } from "lucide-react";
+import { LogOut, Plus, Calendar, Clock, User, Scissors, Phone, Mail, Trash2, Check, X, Edit2, Search, Package, Save, Star, Settings } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import SchedulesTab from "@/components/admin/SchedulesTab";
+import ReviewsTab from "@/components/admin/ReviewsTab";
 
 type Appointment = Tables<"appointments">;
 
@@ -28,7 +30,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 const barbers = ["Camilo", "Kimy", "Bryan", "Víctor"];
 
 const Admin = () => {
-  const [tab, setTab] = useState<"appointments" | "services">("appointments");
+  const [tab, setTab] = useState<"appointments" | "services" | "schedules" | "reviews">("appointments");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,6 +197,15 @@ const Admin = () => {
               <Plus className="w-4 h-4" /> Nuevo Servicio
             </button>
           )}
+          {tab === "reviews" && (
+            <button onClick={() => {
+              const reviewsTab = document.querySelector('[data-reviews-add]');
+              if (reviewsTab) (reviewsTab as HTMLButtonElement).click();
+            }}
+              className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm hover:brightness-110 transition-all">
+              <Plus className="w-4 h-4" /> Nueva Reseña
+            </button>
+          )}
           <button onClick={handleLogout} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm border border-border px-3 py-2 rounded-lg">
             <LogOut className="w-4 h-4" /> Salir
           </button>
@@ -203,12 +214,18 @@ const Admin = () => {
 
       <div className="p-4 md:p-8 max-w-7xl mx-auto">
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setTab("appointments")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "appointments" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+        <div className="flex gap-2 mb-6 overflow-x-auto">
+          <button onClick={() => setTab("appointments")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "appointments" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
             <Calendar className="w-4 h-4" /> Citas
           </button>
-          <button onClick={() => setTab("services")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${tab === "services" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+          <button onClick={() => setTab("services")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "services" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
             <Package className="w-4 h-4" /> Servicios
+          </button>
+          <button onClick={() => setTab("schedules")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "schedules" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+            <Settings className="w-4 h-4" /> Horarios
+          </button>
+          <button onClick={() => setTab("reviews")} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${tab === "reviews" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
+            <Star className="w-4 h-4" /> Reseñas
           </button>
         </div>
 
@@ -388,6 +405,12 @@ const Admin = () => {
             </div>
           </>
         )}
+
+        {/* ============ SCHEDULES TAB ============ */}
+        {tab === "schedules" && <SchedulesTab />}
+
+        {/* ============ REVIEWS TAB ============ */}
+        {tab === "reviews" && <ReviewsTab />}
       </div>
     </div>
   );

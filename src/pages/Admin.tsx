@@ -408,7 +408,7 @@ const Admin = () => {
         {tab === "schedules" && <SchedulesTab />}
 
         {/* ============ REVIEWS TAB ============ */}
-        {tab === "reviews" && <ReviewsTab />}
+        {tab === "reviews" && <ReviewsTab addTrigger={addReviewTrigger} />}
       </div>
     </div>
   );

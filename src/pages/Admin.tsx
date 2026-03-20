@@ -199,10 +199,7 @@ const Admin = () => {
             </button>
           )}
           {tab === "reviews" && (
-            <button onClick={() => {
-              const reviewsTab = document.querySelector('[data-reviews-add]');
-              if (reviewsTab) (reviewsTab as HTMLButtonElement).click();
-            }}
+            <button onClick={() => setAddReviewTrigger(t => t + 1)}
               className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm hover:brightness-110 transition-all">
               <Plus className="w-4 h-4" /> Nueva Reseña
             </button>

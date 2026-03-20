@@ -30,7 +30,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 const barbers = ["Camilo", "Kimy", "Bryan", "Víctor"];
 
 const Admin = () => {
-  const [tab, setTab] = useState<"appointments" | "services">("appointments");
+  const [tab, setTab] = useState<"appointments" | "services" | "schedules" | "reviews">("appointments");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);

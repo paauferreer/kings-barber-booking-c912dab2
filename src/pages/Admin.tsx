@@ -35,6 +35,7 @@ const Admin = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [addReviewTrigger, setAddReviewTrigger] = useState(0);
   const [barberFilter, setBarberFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);

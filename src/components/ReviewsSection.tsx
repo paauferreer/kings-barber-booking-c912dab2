@@ -1,16 +1,35 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const reviews = [
-  { name: "Alfonso", date: "13 mar 2026", text: "Excelentes profesionales, super amables! Se nota que disfrutan con lo que hacen. Para volver una y otra vez.", barber: "Camilo", rating: 5 },
-  { name: "Pedro", date: "5 mar 2026", text: "Corte perfecto, buen trato y ambiente top. No cambio de barbero.", barber: "Víctor", rating: 5 },
-  { name: "Joel", date: "3 mar 2026", text: "Corte 10 de 10, servicio y ambiente más de lo mismo. Muchas gracias 💪🏽👏🏽", barber: "Víctor", rating: 5 },
-  { name: "Natalia", date: "6 mar 2026", text: "Son los mejores, en especial Víctor.", barber: "Víctor", rating: 5 },
-  { name: "Mireia", date: "26 feb 2026", text: "Fue el primer corte de mi peque y todo perfecto. Gracias.", barber: "Bryan", rating: 5 },
-  { name: "Aitor", date: "26 feb 2026", text: "Muy buen corte y muy majo el barbero.", barber: "Camilo", rating: 5 },
-];
+interface Review {
+  id: string;
+  name: string;
+  review_date: string;
+  text: string;
+  barber: string;
+  rating: number;
+}
 
 const ReviewsSection = () => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("is_visible", true);
+      if (data) {
+        // Shuffle and pick 6
+        const shuffled = data.sort(() => Math.random() - 0.5).slice(0, 6);
+        setReviews(shuffled);
+      }
+    };
+    fetchReviews();
+  }, []);
+
   return (
     <section id="resenas" className="section-padding bg-background">
       <div className="max-w-7xl mx-auto">
@@ -37,7 +56,7 @@ const ReviewsSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((r, i) => (
             <motion.div
-              key={i}
+              key={r.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -55,7 +74,7 @@ const ReviewsSection = () => {
                   <p className="font-semibold text-foreground">{r.name}</p>
                   <p className="text-xs text-muted-foreground">Barbero: {r.barber}</p>
                 </div>
-                <span className="text-xs text-muted-foreground">{r.date}</span>
+                <span className="text-xs text-muted-foreground">{r.review_date}</span>
               </div>
             </motion.div>
           ))}

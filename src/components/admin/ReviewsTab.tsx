@@ -28,6 +28,14 @@ const ReviewsTab = ({ addTrigger }: ReviewsTabProps) => {
 
   useEffect(() => { fetchReviews(); }, []);
 
+  useEffect(() => {
+    if (addTrigger && addTrigger > 0) {
+      resetForm();
+      setEditingId(null);
+      setShowForm(true);
+    }
+  }, [addTrigger]);
+
   const fetchReviews = async () => {
     setLoading(true);
     const { data } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });

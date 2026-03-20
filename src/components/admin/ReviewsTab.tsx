@@ -15,7 +15,11 @@ interface Review {
 
 const barbers = ["Camilo", "Kimy", "Bryan", "Víctor"];
 
-const ReviewsTab = () => {
+interface ReviewsTabProps {
+  addTrigger?: number;
+}
+
+const ReviewsTab = ({ addTrigger }: ReviewsTabProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -23,6 +27,14 @@ const ReviewsTab = () => {
   const [form, setForm] = useState({ name: "", review_date: "", text: "", barber: "", rating: 5, is_visible: true });
 
   useEffect(() => { fetchReviews(); }, []);
+
+  useEffect(() => {
+    if (addTrigger && addTrigger > 0) {
+      resetForm();
+      setEditingId(null);
+      setShowForm(true);
+    }
+  }, [addTrigger]);
 
   const fetchReviews = async () => {
     setLoading(true);

@@ -146,7 +146,7 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
     });
     const dateStr = dateObj ? dateObj.toISOString().split("T")[0] : selectedDate;
 
-    const { error } = await supabase.from("appointments").insert({
+    const bookingData = {
       client_name: name,
       client_phone: phone,
       client_email: email || null,
@@ -154,12 +154,20 @@ const BookingModal = ({ isOpen, onClose, preselectedService }: BookingModalProps
       barber: selectedBarber,
       appointment_date: dateStr,
       appointment_time: selectedTime,
-    });
+    };
+
+    const { error } = await supabase.from("appointments").insert(bookingData);
 
     if (error) {
       toast.error("Error al reservar. Inténtalo de nuevo.");
       return;
     }
+
+    // Send notification emails (fire and forget)
+    supabase.functions.invoke("booking-notification", {
+      body: bookingData,
+    }).catch(err => console.error("Notification error:", err));
+
     setSubmitted(true);
   };
 

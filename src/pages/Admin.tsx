@@ -35,6 +35,7 @@ const Admin = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [addReviewTrigger, setAddReviewTrigger] = useState(0);
   const [barberFilter, setBarberFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -198,10 +199,7 @@ const Admin = () => {
             </button>
           )}
           {tab === "reviews" && (
-            <button onClick={() => {
-              const reviewsTab = document.querySelector('[data-reviews-add]');
-              if (reviewsTab) (reviewsTab as HTMLButtonElement).click();
-            }}
+            <button onClick={() => setAddReviewTrigger(t => t + 1)}
               className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm hover:brightness-110 transition-all">
               <Plus className="w-4 h-4" /> Nueva Reseña
             </button>
@@ -410,7 +408,7 @@ const Admin = () => {
         {tab === "schedules" && <SchedulesTab />}
 
         {/* ============ REVIEWS TAB ============ */}
-        {tab === "reviews" && <ReviewsTab />}
+        {tab === "reviews" && <ReviewsTab addTrigger={addReviewTrigger} />}
       </div>
     </div>
   );

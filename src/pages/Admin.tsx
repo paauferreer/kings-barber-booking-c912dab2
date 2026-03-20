@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Plus, Calendar, Clock, User, Scissors, Phone, Mail, Trash2, Check, X, Edit2, Search, Package, Save } from "lucide-react";
+import { LogOut, Plus, Calendar, Clock, User, Scissors, Phone, Mail, Trash2, Check, X, Edit2, Search, Package, Save, Star, Settings } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import SchedulesTab from "@/components/admin/SchedulesTab";
+import ReviewsTab from "@/components/admin/ReviewsTab";
 
 type Appointment = Tables<"appointments">;
 

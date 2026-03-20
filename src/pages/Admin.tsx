@@ -405,6 +405,12 @@ const Admin = () => {
             </div>
           </>
         )}
+
+        {/* ============ SCHEDULES TAB ============ */}
+        {tab === "schedules" && <SchedulesTab />}
+
+        {/* ============ REVIEWS TAB ============ */}
+        {tab === "reviews" && <ReviewsTab />}
       </div>
     </div>
   );

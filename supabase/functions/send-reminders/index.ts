@@ -1,10 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const SHOP_EMAIL = "kingsbarbershop921@gmail.com";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -15,6 +18,14 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const SMTP_PASSWORD = Deno.env.get("SMTP_PASSWORD");
+    if (!SMTP_PASSWORD) {
+      console.error("SMTP_PASSWORD not configured");
+      return new Response(JSON.stringify({ error: "Email service not configured" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
 
     // Get appointments for tomorrow that have client email
     const tomorrow = new Date();
@@ -37,28 +48,51 @@ serve(async (req) => {
 
     const reminders: string[] = [];
 
-    for (const appt of (appointments || [])) {
-      if (!appt.client_email) continue;
+    if (appointments && appointments.length > 0) {
+      const client = new SmtpClient();
+      await client.connectTLS({
+        hostname: "smtp.gmail.com",
+        port: 465,
+        username: SHOP_EMAIL,
+        password: SMTP_PASSWORD,
+      });
 
-      const reminderBody = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #121212; color: #fff; padding: 30px; border-radius: 12px;">
-          <h1 style="color: #c9982e; font-size: 24px;">⏰ Recordatorio de tu cita</h1>
-          <p>Hola ${appt.client_name},</p>
-          <p>Te recordamos que mañana tienes una cita en Kings Barber Shop.</p>
-          <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Servicio:</strong> ${appt.service}</p>
-            <p><strong>Barbero:</strong> ${appt.barber}</p>
-            <p><strong>Fecha:</strong> ${appt.appointment_date}</p>
-            <p><strong>Hora:</strong> ${appt.appointment_time}</p>
+      for (const appt of appointments) {
+        if (!appt.client_email) continue;
+
+        const reminderSubject = "⏰ Recordatorio de tu cita en Kings Barber Shop";
+        const reminderBody = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #121212; color: #fff; padding: 30px; border-radius: 12px;">
+            <h1 style="color: #c9982e; font-size: 24px;">⏰ Recordatorio de tu cita</h1>
+            <p>Hola ${appt.client_name},</p>
+            <p>Te recordamos que mañana tienes una cita en Kings Barber Shop.</p>
+            <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Servicio:</strong> ${appt.service}</p>
+              <p><strong>Barbero:</strong> ${appt.barber}</p>
+              <p><strong>Fecha:</strong> ${appt.appointment_date}</p>
+              <p><strong>Hora:</strong> ${appt.appointment_time}</p>
+            </div>
+            <p>📍 Carrer de Bertran, 114, Sarrià-Sant Gervasi, 08023 Barcelona</p>
+            <p style="color: #999; font-size: 12px; margin-top: 20px;">Si necesitas cancelar o modificar tu cita, llámanos al 632 279 304.</p>
+            <p style="color: #999; font-size: 12px;">Kings Barber Shop</p>
           </div>
-          <p>📍 Carrer de Bertran, 114, Sarrià-Sant Gervasi, 08023 Barcelona</p>
-          <p style="color: #999; font-size: 12px; margin-top: 20px;">Si necesitas cancelar o modificar tu cita, llámanos al 632 279 304.</p>
-          <p style="color: #999; font-size: 12px;">Kings Barber Shop</p>
-        </div>
-      `;
+        `;
 
-      reminders.push(appt.client_email);
-      console.log(`Reminder prepared for: ${appt.client_email} - ${appt.appointment_date} ${appt.appointment_time}`);
+        try {
+          await client.send({
+            from: SHOP_EMAIL,
+            to: appt.client_email,
+            subject: reminderSubject,
+            content: "Recordatorio de cita para mañana.",
+            html: reminderBody,
+          });
+          reminders.push(appt.client_email);
+        } catch (emailErr) {
+          console.error(`Error sending reminder to ${appt.client_email}:`, emailErr);
+        }
+      }
+
+      await client.close();
     }
 
     console.log(`Processed ${reminders.length} reminders for ${tomorrowStr}`);

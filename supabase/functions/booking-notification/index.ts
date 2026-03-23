@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,15 +16,7 @@ interface BookingPayload {
   appointment_time: string;
 }
 
-// Barber emails - configure these
-const barberEmails: Record<string, string> = {
-  "Camilo": "camilo@kingsbarbershop.com",
-  "Kimy": "kimy@kingsbarbershop.com",
-  "Bryan": "bryan@kingsbarbershop.com",
-  "Víctor": "victor@kingsbarbershop.com",
-};
-
-const SHOP_EMAIL = "info@kingsbarbershop.com";
+const SHOP_EMAIL = "kingsbarbershop921@gmail.com";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -34,37 +26,50 @@ serve(async (req) => {
   try {
     const booking: BookingPayload = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY not configured");
+    const SMTP_PASSWORD = Deno.env.get("SMTP_PASSWORD");
+    if (!SMTP_PASSWORD) {
+      console.error("SMTP_PASSWORD not configured");
       return new Response(JSON.stringify({ error: "Email service not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
+    const client = new SmtpClient();
+    await client.connectTLS({
+      hostname: "smtp.gmail.com",
+      port: 465,
+      username: SHOP_EMAIL,
+      password: SMTP_PASSWORD,
+    });
+
     const results: string[] = [];
 
-    // 1. Notify barber
-    const barberEmail = barberEmails[booking.barber];
-    if (barberEmail) {
-      const barberSubject = `Nueva cita: ${booking.client_name} - ${booking.appointment_date} ${booking.appointment_time}`;
-      const barberBody = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #121212; color: #fff; padding: 30px; border-radius: 12px;">
-          <h1 style="color: #c9982e; font-size: 24px;">Nueva Cita Reservada</h1>
-          <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Cliente:</strong> ${booking.client_name}</p>
-            <p><strong>Teléfono:</strong> ${booking.client_phone}</p>
-            ${booking.client_email ? `<p><strong>Email:</strong> ${booking.client_email}</p>` : ""}
-            <p><strong>Servicio:</strong> ${booking.service}</p>
-            <p><strong>Fecha:</strong> ${booking.appointment_date}</p>
-            <p><strong>Hora:</strong> ${booking.appointment_time}</p>
-          </div>
-          <p style="color: #999; font-size: 12px;">Kings Barber Shop</p>
+    // 1. Notify shop (for all barbers)
+    const shopSubject = `Nueva cita: ${booking.client_name} - ${booking.appointment_date} ${booking.appointment_time}`;
+    const shopBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #121212; color: #fff; padding: 30px; border-radius: 12px;">
+        <h1 style="color: #c9982e; font-size: 24px;">Nueva Cita Reservada (${booking.barber})</h1>
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Barbero:</strong> ${booking.barber}</p>
+          <p><strong>Cliente:</strong> ${booking.client_name}</p>
+          <p><strong>Teléfono:</strong> ${booking.client_phone}</p>
+          ${booking.client_email ? `<p><strong>Email:</strong> ${booking.client_email}</p>` : ""}
+          <p><strong>Servicio:</strong> ${booking.service}</p>
+          <p><strong>Fecha:</strong> ${booking.appointment_date}</p>
+          <p><strong>Hora:</strong> ${booking.appointment_time}</p>
         </div>
-      `;
-      results.push(`barber_notification: ${barberEmail}`);
-      console.log(`Barber notification prepared for: ${barberEmail}`, barberSubject);
-    }
+        <p style="color: #999; font-size: 12px;">Kings Barber Shop</p>
+      </div>
+    `;
+
+    await client.send({
+      from: SHOP_EMAIL,
+      to: SHOP_EMAIL,
+      subject: shopSubject,
+      content: "Nueva cita reservada.",
+      html: shopBody,
+    });
+    results.push(`shop_notification: ${SHOP_EMAIL}`);
 
     // 2. Client confirmation
     if (booking.client_email) {
@@ -85,12 +90,19 @@ serve(async (req) => {
           <p style="color: #999; font-size: 12px;">Kings Barber Shop</p>
         </div>
       `;
+      
+      await client.send({
+        from: SHOP_EMAIL,
+        to: booking.client_email,
+        subject: clientSubject,
+        content: "Cita confirmada.",
+        html: clientBody,
+      });
       results.push(`client_confirmation: ${booking.client_email}`);
-      console.log(`Client confirmation prepared for: ${booking.client_email}`, clientSubject);
     }
 
-    // Store email data for when email domain is configured
-    // For now, log the emails that would be sent
+    await client.close();
+
     console.log("Booking notification results:", results);
 
     return new Response(JSON.stringify({ success: true, notifications: results }), {
